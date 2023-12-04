@@ -1,3 +1,4 @@
+-- untuk membuat database
 CREATE DATABASE online_shop;
 
 
