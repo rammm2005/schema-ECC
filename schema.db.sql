@@ -76,3 +76,34 @@ CREATE TABLE kurir(
     update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
     PRIMARY KEY(id_kurir)
 );
+
+
+CREATE TABLE jenis_pembayaran(
+id_pembayaran CHAR(5) NOT NULL,
+tipe_pembayaran VARCHAR(50) NOT NULL,
+status_pembayaran BOOLEAN DEFAULT(1),
+created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
+update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
+PRIMARY KEY(id_pembayaran)
+);
+
+CREATE TABLE orders(
+id_order CHAR(5) NOT NULL,
+jumlah_order INT(10) NOT NULL,
+total_harga INT(17) NOT NULL,
+alamat_tujuan VARCHAR(100) NOT NULL,
+tgl_order DATE NOT NULL,
+  id_pembayaran CHAR(5) NOT NULL,
+  id_barang CHAR(5) NOT NULL,
+id_kurir CHAR(5) NOT NULL,
+id_penjual CHAR(5) NOT NULL,
+id_pelanggan CHAR(5) NOT NULL,
+created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
+update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
+PRIMARY KEY(id_order),
+FOREIGN KEY(id_barang) REFERENCES barang(id_barang) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(id_kurir) REFERENCES kurir(id_kurir) ON DELETE CASCADE ON UPDATE CASCADE, 
+FOREIGN KEY(id_penjual) REFERENCES penjual(id_penjual) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(id_pelanggan) REFERENCES pelanggan(id_pelanggan) ON DELETE CASCADE ON UPDATE CASCADE,
+FOREIGN KEY(id_pembayaran) REFERENCES jenis_pembayaran(id_pembayaran) ON DELETE CASCADE ON UPDATE CASCADE
+);
