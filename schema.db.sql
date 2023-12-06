@@ -13,14 +13,16 @@ CREATE TABLE kategori (
 CREATE TABLE penjual(
     id_penjual CHAR(5) NOT NULL,
     nama_penjual VARCHAR(50) NOT NULL,
-    alamat_penjual VARCHAR(50) NOT NULL,
+    -- alamat_penjual VARCHAR(50) NOT NULL,
+    id_alamat INT(11) NOT NULL,
     email VARCHAR(50) NOT NULL,
     no_tlp VARCHAR(15) NOT NULL,
     created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
     update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
     jenis_kelamin ENUM('cowok', 'cewek'),
     status_penjual BOOLEAN DEFAULT(1),
-    PRIMARY KEY(id_penjual)
+    PRIMARY KEY(id_penjual),
+    FOREIGN KEY(id_alamat) REFERENCES alamat(id_alamat) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE barang (
     id_barang CHAR(5) NOT NULL,
@@ -35,18 +37,32 @@ CREATE TABLE barang (
     FOREIGN KEY(id_kategori) REFERENCES kategori(id_kategori) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY(id_penjual) REFERENCES penjual(id_penjual) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
 CREATE TABLE pelanggan(
     id_pelanggan CHAR(5) NOT NULL,
-    nama_pembeli VARCHAR(50) NOT NULL,
+    nama_pelanggan VARCHAR(50) NOT NULL,
     tgl_lahir DATE NOT NULL,
     jenis_kelamin ENUM('cowok', 'cewek', 'kustom'),
-    alamat_pembeli VARCHAR(50) NOT NULL,
+    id_alamat INT(11) NOT NULL,
     email VARCHAR(50) NOT NULL,
     created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
     update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
     no_tlp VARCHAR(50) NOT NULL,
-    PRIMARY KEY(id_pelanggan)
+    PRIMARY KEY(id_pelanggan),
+    FOREIGN KEY(id_alamat) REFERENCES alamat(id_alamat) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+CREATE TABLE alamat(
+    id_alamat INT(11) AUTO_INCREMENTS NOT NULL,
+    kode_pos INT(10) NOT NULL,
+    kabupaten VARCHAR(50),
+    kecamatan VARCHAR(50),
+    provinsi VARCHAR(50) NOT NULL,
+    jalan VARCHAR(100) NOT NULL,
+    PRIMARY KEY(id_alamat)
+);
+
 CREATE TABLE rating(
     id_rating INT(11) NOT NULL AUTO_INCREMENT,
     id_barang CHAR(5) NOT NULL,
