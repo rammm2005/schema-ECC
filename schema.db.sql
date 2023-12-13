@@ -453,36 +453,38 @@ GROUP BY R.id_produk, JP.tipe_pembayaran;
 -- 1. Produk yang terjual pada tanggal tertentu
 SELECT *
 FROM orders
-WHERE tgl_order = '2023-12-13'; -- Ganti tanggal sesuai kebutuhan
+WHERE tgl_order = '2023-01-16'; -- Ganti tanggal sesuai kebutuhan
 
 -- 2. Pelanggan yang paling banyak berbelanja
-UNION ALL
-SELECT id_pelanggan, COUNT(*) AS total_orders
+SELECT orders.id_pelanggan, pelanggan.nama_pelanggan, SUM(jumlah_order * total_harga) AS total_orders
 FROM orders
-GROUP BY id_pelanggan
+JOIN pelanggan ON orders.id_pelanggan = pelanggan.id_pelanggan
+GROUP BY orders.id_pelanggan
 ORDER BY total_orders DESC
 LIMIT 1;
 
+
+
 -- 3. Pelanggan dengan metode pengiriman apa
-UNION ALL
+
 SELECT O.id_pelanggan, O.id_kurir, O.id_pembayaran, J.tipe_pembayaran
 FROM orders O
 JOIN jenis_pembayaran J ON O.id_pembayaran = J.id_pembayaran
-WHERE O.id_pelanggan = 'contoh_id_pelanggan'; -- Ganti id_pelanggan sesuai kebutuhan
+WHERE O.id_pelanggan = 'C1000'; 
 
 -- 4. Pelanggan di alamat tertentu
 UNION ALL
 SELECT P.*
 FROM pelanggan P
 JOIN alamat A ON P.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos'; -- Ganti id_kode_pos sesuai kebutuhan
+WHERE A.id_kode_pos = 'contoh_id_kode_pos'; 
 
 -- 5. Penjual di alamat tertentu
 UNION ALL
 SELECT Pe.*
 FROM penjual Pe
 JOIN alamat A ON Pe.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos'; -- Ganti id_kode_pos sesuai kebutuhan
+WHERE A.id_kode_pos = 'contoh_id_kode_pos'; 
 
 -- 6. Penjual dengan penjualan terbanyak
 UNION ALL
