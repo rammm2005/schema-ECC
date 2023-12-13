@@ -447,3 +447,71 @@ SELECT R.id_produk, JP.tipe_pembayaran, AVG(R.bintang) AS avg_rating
 FROM rating R
 JOIN jenis_pembayaran JP ON R.id_pembayaran = JP.id_pembayaran
 GROUP BY R.id_produk, JP.tipe_pembayaran;
+
+
+-- SELECT Case
+-- 1. Produk yang terjual pada tanggal tertentu
+SELECT *
+FROM orders
+WHERE tgl_order = '2023-12-13'; -- Ganti tanggal sesuai kebutuhan
+
+-- 2. Pelanggan yang paling banyak berbelanja
+UNION ALL
+SELECT id_pelanggan, COUNT(*) AS total_orders
+FROM orders
+GROUP BY id_pelanggan
+ORDER BY total_orders DESC
+LIMIT 1;
+
+-- 3. Pelanggan dengan metode pengiriman apa
+UNION ALL
+SELECT O.id_pelanggan, O.id_kurir, O.id_pembayaran, J.tipe_pembayaran
+FROM orders O
+JOIN jenis_pembayaran J ON O.id_pembayaran = J.id_pembayaran
+WHERE O.id_pelanggan = 'contoh_id_pelanggan'; -- Ganti id_pelanggan sesuai kebutuhan
+
+-- 4. Pelanggan di alamat tertentu
+UNION ALL
+SELECT P.*
+FROM pelanggan P
+JOIN alamat A ON P.id_kode_pos = A.id_kode_pos
+WHERE A.id_kode_pos = 'contoh_id_kode_pos'; -- Ganti id_kode_pos sesuai kebutuhan
+
+-- 5. Penjual di alamat tertentu
+UNION ALL
+SELECT Pe.*
+FROM penjual Pe
+JOIN alamat A ON Pe.id_kode_pos = A.id_kode_pos
+WHERE A.id_kode_pos = 'contoh_id_kode_pos'; -- Ganti id_kode_pos sesuai kebutuhan
+
+-- 6. Penjual dengan penjualan terbanyak
+UNION ALL
+SELECT id_penjual, COUNT(*) AS total_penjualan
+FROM orders
+GROUP BY id_penjual
+ORDER BY total_penjualan DESC
+LIMIT 1;
+
+-- 7. Penjual dengan tahun join paling lama
+UNION ALL
+SELECT P.id_penjual, MIN(YEAR(P.created_at)) AS tahun_join
+FROM penjual P
+GROUP BY P.id_penjual
+ORDER BY tahun_join ASC
+LIMIT 1;
+
+-- 8. Pelanggan dengan rating terbaik
+UNION ALL
+SELECT R.id_pelanggan, AVG(R.bintang) AS avg_rating
+FROM rating R
+GROUP BY R.id_pelanggan
+ORDER BY avg_rating DESC
+LIMIT 1;
+
+-- 9. Pelanggan dengan rating terburuk
+UNION ALL
+SELECT R.id_pelanggan, AVG(R.bintang) AS avg_rating
+FROM rating R
+GROUP BY R.id_pelanggan
+ORDER BY avg_rating ASC
+LIMIT 1;
