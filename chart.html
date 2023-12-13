@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Kompleksitas Waktu</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <style>
+        h3 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 2.5rem;
+            text-align: center;
+            font-weight: bolder;
+        }
+
+        h5 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.8rem;
+            text-align: center;
+            font-weight: bolder;
+            color: #6f6e6e;
+        }
+    </style>
+    <div style="width: 80%; margin: auto;">
+        <h3>Optimal Binary Search Tree</h3>
+        <canvas id="myChart"></canvas>
+        <h5>Jumlah Data</h5>
+    </div>
+
+    <script>
+        const jumlahData = Array.from({
+            length: 1000
+        }, (_, i) => i + 1);
+
+        // kompleksitas waktu
+        const kompleksitasWaktu = jumlahData.map(n => Math.log2(n));
+
+        // chart setup
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: jumlahData,
+                datasets: [{
+                    label: 'Kompleksitas Waktu (O(log n))',
+                    data: kompleksitasWaktu,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: {
+                            color: '#000', 
+                            fontWeight: 'bolder',
+                            size:14,
+                            family: 'Arial, Helvetica, sans-serif'                         
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        position: 'left',
+                        ticks: {
+                            color: '#000', 
+                            size:14,
+                            family: 'Arial, Helvetica, sans-serif',
+                            fontWeight: 'bolder',
+                            callback: function (value, index, values) {
+                                return 'O(log ' + value + ')';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

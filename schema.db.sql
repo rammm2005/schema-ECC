@@ -463,8 +463,6 @@ GROUP BY orders.id_pelanggan
 ORDER BY total_orders DESC
 LIMIT 1;
 
-
-
 -- 3. Pelanggan dengan metode pengiriman apa
 
 SELECT O.id_pelanggan, O.id_kurir, O.id_pembayaran, J.tipe_pembayaran
