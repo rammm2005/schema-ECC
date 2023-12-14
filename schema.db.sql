@@ -16,36 +16,45 @@ CREATE TABLE provinsi (
 CREATE TABLE kabupaten (
   id_kabupaten INT(11) AUTO_INCREMENT NOT NULL,
   nama_kabupaten VARCHAR(50) NOT NULL,
-  id_provinsi INT(11) NOT NULL,
-  PRIMARY KEY(id_kabupaten),
-  FOREIGN KEY(id_provinsi) REFERENCES provinsi(id_provinsi) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY(id_kabupaten)
 );
 CREATE TABLE kecamatan (
   id_kecamatan INT(11) AUTO_INCREMENT NOT NULL,
   nama_kecamatan VARCHAR(50) NOT NULL,
-  id_kabupaten INT(11) NOT NULL,
-  PRIMARY KEY(id_kecamatan),
-  FOREIGN KEY(id_kabupaten) REFERENCES kabupaten(id_kabupaten) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY(id_kecamatan)
 );
 CREATE TABLE desa_kelurahan (
   id_desa_kelurahan INT(11) AUTO_INCREMENT NOT NULL,
   nama_desa_kelurahan VARCHAR(50) NOT NULL,
-  id_kecamatan INT(11) NOT NULL,
-  PRIMARY KEY(id_desa_kelurahan),
-  FOREIGN KEY(id_kecamatan) REFERENCES kecamatan(id_kecamatan) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY(id_desa_kelurahan)
 );
+
 CREATE TABLE kode_pos (
   id_kode_pos INT(11) AUTO_INCREMENT NOT NULL,
   kode_pos INT(10) NOT NULL,
-  id_desa_kelurahan INT(11) NOT NULL,
-  PRIMARY KEY(id_kode_pos),
-  FOREIGN KEY(id_desa_kelurahan) REFERENCES desa_kelurahan(id_desa_kelurahan) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY(id_kode_pos)
 );
+
+CREATE TABLE alamat (
+  id_alamat INT(11) AUTO_INCREMENT NOT NULL,
+  id_provinsi INT(11) NOT NULL,
+  id_kabupaten INT(11)  NOT NULL,
+  id_kode_pos INT(11) NOT NULL,
+  id_kecamatan INT(11) NOT NULL,
+  id_desa_kelurahan INT(11) NOT NULL,
+  PRIMARY KEY(id_alamat),
+  FOREIGN KEY(id_provinsi) REFERENCES provinsi(id_provinsi) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(id_kabupaten) REFERENCES kabupaten(id_kabupaten) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(id_kecamatan) REFERENCES kecamatan(id_kecamatan) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(id_desa_kelurahan) REFERENCES desa_kelurahan(id_desa_kelurahan) ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY(id_kode_pos) REFERENCES kode_pos(id_kode_pos) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE penjual (
   id_penjual CHAR(5) NOT NULL,
   nama_penjual VARCHAR(50) NOT NULL,
   jalan VARCHAR(150),
-  id_kode_pos INT(11) NOT NULL,
+  id_alamat INT(11) NOT NULL,
   email VARCHAR(50) NOT NULL,
   no_tlp VARCHAR(15) NOT NULL,
   created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
@@ -53,7 +62,7 @@ CREATE TABLE penjual (
   jenis_kelamin ENUM('cowok', 'cewek'),
   status_penjual BOOLEAN DEFAULT(1),
   PRIMARY KEY(id_penjual),
-  FOREIGN KEY(id_kode_pos) REFERENCES kode_pos(id_kode_pos) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY(id_alamat) REFERENCES alamat(id_alamat) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE produk (
   id_produk CHAR(5) NOT NULL,
@@ -74,13 +83,13 @@ CREATE TABLE pelanggan(
   jalan VARCHAR(150),
   tgl_lahir DATE NOT NULL,
   jenis_kelamin ENUM('cowok', 'cewek', 'kustom'),
-  id_kode_pos INT(11) NOT NULL,
+  id_alamat INT(11)  NOT NULL, 
   email VARCHAR(50) NOT NULL,
   created_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
   update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
   no_tlp VARCHAR(50) NOT NULL,
   PRIMARY KEY(id_pelanggan),
-  FOREIGN KEY(id_kode_pos) REFERENCES kode_pos(id_kode_pos) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY(id_alamat) REFERENCES alamat(id_alamat) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE rating(
   id_rating INT(11) NOT NULL AUTO_INCREMENT,
@@ -151,37 +160,48 @@ VALUES ('J0001', 'HandPhone'),
   ('J0005', 'Personal Computer');
 -- Insert into provinsi
 INSERT INTO provinsi (nama_provinsi)
-VALUES ('Bali');
+VALUES ('Bali'),('jakarta');
 -- Insert into kabupaten
-INSERT INTO kabupaten (nama_kabupaten, id_provinsi)
-VALUES ('Badung', 1),
-  ('Bangli', 1),
-  ('Buleleng', 1),
-  ('Gianyar', 1),
-  ('Jembrana', 1),
-  ('Karangasem', 1),
-  ('Klungkung', 1),
-  ('Tabanan', 1);
+INSERT INTO kabupaten (nama_kabupaten)
+VALUES ('Badung'),
+  ('Bangli'),
+  ('Buleleng'),
+  ('Gianyar'),
+  ('Jembrana'),
+  ('Karangasem'),
+  ('Klungkung'),
+  ('Jakarta Selatan'),
+  ('Tabanan');
 -- Insert into kecamatan
-INSERT INTO kecamatan (nama_kecamatan, id_kabupaten)
-VALUES ('Kuta', 1),
-  ('Petang', 1);
+INSERT INTO kecamatan (nama_kecamatan)
+VALUES ('Kuta'),
+    ('Menteng'),
+  ('Petang');
 -- Insert into desa_kelurahan
-INSERT INTO desa_kelurahan (nama_desa_kelurahan, id_kecamatan)
-VALUES ('Kuta', 1),
-  ('Legian', 1);
+INSERT INTO desa_kelurahan (nama_desa_kelurahan)
+VALUES ('Kuta'),
+('Cikini'),
+  ('Legian');
 -- Insert into kode_pos
-INSERT INTO kode_pos (kode_pos, id_desa_kelurahan)
-VALUES (80361, 1),
+INSERT INTO kode_pos (kode_pos)
+VALUES (80361),
+    (1230),
   -- Kuta
-  (80361, 2);
+  (80361);
 -- Legian
+
+INSERT INTO alamat(
+  id_provinsi ,
+  id_kabupaten ,
+  id_kode_pos ,
+  id_kecamatan ,
+  id_desa_kelurahan) VALUES (1,1,1,1,1), (2,8,2,2,2);
 -- Insert into penjual
 INSERT INTO penjual (
     id_penjual,
     nama_penjual,
     jalan,
-    id_kode_pos,
+    id_alamat,
     email,
     no_tlp,
     jenis_kelamin,
@@ -239,7 +259,7 @@ INSERT INTO pelanggan (
     jalan,
     tgl_lahir,
     jenis_kelamin,
-    id_kode_pos,
+    id_alamat,
     email,
     no_tlp
   )
