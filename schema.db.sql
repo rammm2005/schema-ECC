@@ -468,6 +468,20 @@ FROM rating R
 JOIN jenis_pembayaran JP ON R.id_pembayaran = JP.id_pembayaran
 GROUP BY R.id_produk, JP.tipe_pembayaran;
 
+-- 21. Average Rating by Age Group for Each Category
+SELECT K.nama_kategori, 
+    CASE 
+        WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 18 AND 30 THEN '18-30'
+        WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 31 AND 45 THEN '31-45'
+        ELSE '46+'
+    END AS age_group,
+    AVG(R.bintang) AS avg_rating
+FROM rating R
+JOIN pelanggan Pel ON R.id_pelanggan = Pel.id_pelanggan
+JOIN produk B ON R.id_produk = B.id_produk
+JOIN kategori K ON B.id_kategori = K.id_kategori
+GROUP BY K.nama_kategori, age_group;
+
 
 -- SELECT Case
 -- 1. Produk yang terjual pada tanggal tertentu
@@ -484,25 +498,24 @@ ORDER BY total_orders DESC
 LIMIT 1;
 
 -- 3. Pelanggan dengan metode pengiriman apa
-
 SELECT O.id_pelanggan, O.id_kurir, O.id_pembayaran, J.tipe_pembayaran
 FROM orders O
 JOIN jenis_pembayaran J ON O.id_pembayaran = J.id_pembayaran
-WHERE O.id_pelanggan = 'C1000'; 
+WHERE O.id_pelanggan = 'C1000';
 
 -- 4. Pelanggan di alamat tertentu
 UNION ALL
 SELECT P.*
 FROM pelanggan P
 JOIN alamat A ON P.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos'; 
+WHERE A.id_kode_pos = 'contoh_id_kode_pos';
 
 -- 5. Penjual di alamat tertentu
 UNION ALL
 SELECT Pe.*
 FROM penjual Pe
 JOIN alamat A ON Pe.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos'; 
+WHERE A.id_kode_pos = 'contoh_id_kode_pos';
 
 -- 6. Penjual dengan penjualan terbanyak
 UNION ALL
@@ -535,3 +548,4 @@ FROM rating R
 GROUP BY R.id_pelanggan
 ORDER BY avg_rating ASC
 LIMIT 1;
+
