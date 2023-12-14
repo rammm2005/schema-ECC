@@ -148,9 +148,21 @@ CREATE TABLE jasa_pengiriman(
   update_at DATETIME(4) DEFAULT CURRENT_TIMESTAMP(4) NOT NULL,
   PRIMARY KEY(kode_pengiriman)
 );
+
+
+
 -- Alter Table Command
 ALTER TABLE produk
 ADD stok INT(11) NOT NULL;
+
+ALTER TABLE rating
+MODIFY COLUMN bintang DECIMAL(3,2) NOT NULL;
+
+
+
+
+
+
 -- Insert Command
 INSERT INTO kategori(id_kategori, nama_kategori)
 VALUES ('J0001', 'HandPhone'),
@@ -345,103 +357,108 @@ VALUES ('JP001', 'Reguler', 1),
 
 -- Study Case AVG
 -- 1. Average Rating for Each Product
-SELECT id_produk, AVG(bintang) AS avg_rating
+SELECT id_produk, ROUND(AVG(bintang), 1) AS Avgg_Rating
 FROM rating
 GROUP BY id_produk;
 
 -- 2. Average Price of Products by Category
-SELECT K.nama_kategori, AVG(P.harga) AS avg_price
+SELECT K.nama_kategori, CONCAT('Rp ', FORMAT(AVG(P.harga), 0)) AS avg_price
 FROM produk P
 JOIN kategori K ON P.id_kategori = K.id_kategori
 GROUP BY K.nama_kategori;
 
--- 3. Average Order Quantity
-SELECT AVG(jumlah_order) AS avg_order_quantity
-FROM orders;
+-- 3. Average Order Quantity by order date
+SELECT tgl_order, ROUND(AVG(jumlah_order)) AS avg_order_quantity
+FROM orders ORDER BY tgl_order;
 
 -- 4. Average Order Total Price
-SELECT AVG(total_harga) AS avg_order_total_price
+SELECT CONCAT('Rp ', FORMAT(AVG(total_harga), 0)) AS avg_order_total_price
 FROM orders;
 
 -- 5. Average Price of Products Sold by Each Seller
-SELECT P.nama_penjual, AVG(B.harga) AS avg_price
+SELECT P.nama_penjual, CONCAT('Rp ', FORMAT(AVG(B.harga), 0)) AS avg_price
 FROM produk B
 JOIN penjual P ON B.id_penjual = P.id_penjual
 GROUP BY P.nama_penjual;
 
 -- 6. Average Number of Orders per Customer
-SELECT id_pelanggan, AVG(jumlah_order) AS avg_orders_per_customer
+SELECT id_pelanggan, ROUND(AVG(jumlah_order)) AS avg_orders_per_customer
 FROM orders
 GROUP BY id_pelanggan;
 
 -- 7. Average Rating for Each Category
-SELECT K.nama_kategori, AVG(R.bintang) AS avg_rating
-FROM kategori K
-LEFT JOIN produk B ON K.id_kategori = B.id_kategori
-LEFT JOIN rating R ON B.id_produk = R.id_produk
-GROUP BY K.nama_kategori;
+SELECT
+  K.nama_kategori,
+  CASE
+    WHEN AVG(R.bintang) IS NULL THEN 'belum ada rating'
+    ELSE ROUND(AVG(R.bintang), 2)
+  END AS avg_rating
+FROM
+  kategori K
+  LEFT JOIN produk B ON K.id_kategori = B.id_kategori
+  LEFT JOIN rating R ON B.id_produk = R.id_produk
+GROUP BY
+  K.nama_kategori;
 
 -- 8. Average Price of Products Sold by Each Seller in Each Category
-SELECT P.nama_penjual, K.nama_kategori, AVG(B.harga) AS avg_price
+SELECT P.nama_penjual, K.nama_kategori, CONCAT('Rp ', FORMAT(AVG(B.harga), 0)) AS avg_price
 FROM produk B
 JOIN penjual P ON B.id_penjual = P.id_penjual
 JOIN kategori K ON B.id_kategori = K.id_kategori
 GROUP BY P.nama_penjual, K.nama_kategori;
 
 -- 9. Average Rating by Gender for Each Product
-SELECT R.id_produk, P.jenis_kelamin, AVG(R.bintang) AS avg_rating
+SELECT R.id_produk, P.jenis_kelamin, ROUND(AVG(R.bintang), 2) AS avg_rating
 FROM rating R
 JOIN pelanggan P ON R.id_pelanggan = P.id_pelanggan
 GROUP BY R.id_produk, P.jenis_kelamin;
 
 -- 10. Average Order Quantity by Product
-SELECT id_produk, AVG(jumlah_order) AS avg_order_quantity
+SELECT id_produk, ROUND(AVG(jumlah_order), 2) AS avg_order_quantity
 FROM orders
 GROUP BY id_produk;
 
 -- 11. Average Price of Products Sold by Each Seller by Gender
-SELECT P.nama_penjual, Pel.jenis_kelamin, AVG(B.harga) AS avg_price
+SELECT P.nama_penjual, Pel.jenis_kelamin,Pel.`id_alamat`, AVG(B.harga) AS avg_price
 FROM produk B
 JOIN penjual P ON B.id_penjual = P.id_penjual
-JOIN pelanggan Pel ON P.id_penjual = Pel.id_alamat
-GROUP BY P.nama_penjual, Pel.jenis_kelamin;
+JOIN pelanggan Pel ON P.id_alamat = Pel.id_alamat
+GROUP BY P.nama_penjual, Pel.jenis_kelamin, Pel.id_alamat;
 
 -- 12. Average Order Quantity by Seller
-SELECT id_penjual, AVG(jumlah_order) AS avg_order_quantity
+SELECT id_penjual, ROUND(AVG(jumlah_order), 1) AS avg_order_quantity
 FROM orders
 GROUP BY id_penjual;
 
 -- 13. Average Price of Products Sold in Each Province
-SELECT A.provinsi, AVG(B.harga) AS avg_price
-FROM produk B
-JOIN penjual P ON B.id_penjual = P.id_penjual
+SELECT PR.nama_provinsi, PRO.merk, CONCAT('Rp ', FORMAT(AVG(O.total_harga), 0)) AS avg_price_province
+FROM orders O
+JOIN penjual P ON O.id_penjual = P.id_penjual
+JOIN produk PRO ON O.`id_produk` = PRO.`id_produk`
 JOIN alamat A ON P.id_alamat = A.id_alamat
-GROUP BY A.provinsi;
+JOIN provinsi PR ON A.id_provinsi = PR.id_provinsi
+GROUP BY PR.nama_provinsi;
 
 -- 14. Average Order Total Price by Seller
-SELECT id_penjual, AVG(total_harga) AS avg_order_total_price
+SELECT id_penjual, CONCAT('Rp ', FORMAT(AVG(total_harga), 0)) AS avg_order_total_price
 FROM orders
 GROUP BY id_penjual;
 
 -- 15. Average Price of Products Sold in Each City
-SELECT A.kabupaten, AVG(B.harga) AS avg_price
+SELECT K.nama_kabupaten, CONCAT('Rp ', FORMAT(AVG(B.harga), 0)) AS avg_price
 FROM produk B
 JOIN penjual P ON B.id_penjual = P.id_penjual
 JOIN alamat A ON P.id_alamat = A.id_alamat
-GROUP BY A.kabupaten;
+JOIN kabupaten K ON A.id_kabupaten = K.id_kabupaten
+GROUP BY K.nama_kabupaten;
 
--- 16. Average Rating for Each Product by Gender
-SELECT R.id_produk, Pel.jenis_kelamin, AVG(R.bintang) AS avg_rating
-FROM rating R
-JOIN pelanggan Pel ON R.id_pelanggan = Pel.id_pelanggan
-GROUP BY R.id_produk, Pel.jenis_kelamin;
 
--- 17. Average Price of Products Sold by Each Seller in Each City
-SELECT P.nama_penjual, A.kabupaten, AVG(B.harga) AS avg_price
-FROM produk B
-JOIN penjual P ON B.id_penjual = P.id_penjual
-JOIN alamat A ON P.id_alamat = A.id_alamat
-GROUP BY P.nama_penjual, A.kabupaten;
+-- 17 AVG price by payments
+SELECT JP.tipe_pembayaran, CONCAT('Rp ', FORMAT(AVG(O.`total_harga`), 0)) AS AVG_Price
+FROM orders O
+JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
+GROUP BY JP.tipe_pembayaran;
+
 
 -- 18. Average Rating by Age Group for Each Product
 SELECT R.id_produk, 
@@ -449,58 +466,134 @@ SELECT R.id_produk,
         WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 18 AND 30 THEN '18-30'
         WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 31 AND 45 THEN '31-45'
         ELSE '46+'
-    END AS age_group,
-    AVG(R.bintang) AS avg_rating
+    END AS cos_age_group,
+    ROUND(AVG(R.bintang), 2) AS avg_rating
 FROM rating R
 JOIN pelanggan Pel ON R.id_pelanggan = Pel.id_pelanggan
-GROUP BY R.id_produk, age_group;
+GROUP BY R.id_produk, cos_age_group;
 
 -- 19. Average Order Quantity by Category
-SELECT K.nama_kategori, AVG(jumlah_order) AS avg_order_quantity
+SELECT K.nama_kategori, ROUND(AVG(jumlah_order), 1) AS avg_order_quantity
 FROM orders O
 JOIN produk B ON O.id_produk = B.id_produk
 JOIN kategori K ON B.id_kategori = K.id_kategori
 GROUP BY K.nama_kategori;
 
--- 20. Average Rating by Payment Type for Each Product
-SELECT R.id_produk, JP.tipe_pembayaran, AVG(R.bintang) AS avg_rating
+-- 20. Average Rating by Payment Type for Each Product 
+SELECT O.id_produk, JP.tipe_pembayaran, ROUND(AVG(R.bintang), 1) AS avg_rating
 FROM rating R
-JOIN jenis_pembayaran JP ON R.id_pembayaran = JP.id_pembayaran
-GROUP BY R.id_produk, JP.tipe_pembayaran;
+JOIN orders O ON R.id_produk = O.id_produk 
+JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
+GROUP BY O.id_produk, JP.tipe_pembayaran;
 
--- 21. Average Rating by Age Group for Each Category
-SELECT K.nama_kategori, 
-    CASE 
-        WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 18 AND 30 THEN '18-30'
-        WHEN YEAR(CURRENT_DATE) - YEAR(Pel.tgl_lahir) BETWEEN 31 AND 45 THEN '31-45'
-        ELSE '46+'
-    END AS age_group,
-    AVG(R.bintang) AS avg_rating
-FROM rating R
-JOIN pelanggan Pel ON R.id_pelanggan = Pel.id_pelanggan
-JOIN produk B ON R.id_produk = B.id_produk
+
+-- SUM AND COUNT STUDY CASE
+-- 16. Count of Ratings by Product
+SELECT id_produk, COUNT(id_rating) AS rating_count
+FROM rating
+GROUP BY id_produk;
+
+-- 21. Sum of Order Quantity by Category
+SELECT K.nama_kategori, SUM(jumlah_order) AS total_order_quantity
+FROM orders O
+JOIN produk B ON O.id_produk = B.id_produk
 JOIN kategori K ON B.id_kategori = K.id_kategori
-GROUP BY K.nama_kategori, age_group;
+GROUP BY K.nama_kategori;
+
+-- 22. Sum of Order Total Price by Seller
+SELECT id_penjual, CONCAT('Rp ', FORMAT(SUM(total_harga), 0)) AS total_order_price
+FROM orders
+GROUP BY id_penjual;
+
+-- 23. Sum of Order Total Price by Payment Type
+SELECT JP.tipe_pembayaran, CONCAT('Rp ', FORMAT(SUM(O.total_harga), 0)) AS total_order_price
+FROM orders O
+JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
+GROUP BY JP.tipe_pembayaran;
+
+-- 24. Count of Orders by Seller
+SELECT id_penjual, COUNT(id_order) AS order_count
+FROM orders
+GROUP BY id_penjual;
+
+-- 25. Count of Orders by Payment Type
+SELECT JP.tipe_pembayaran, COUNT(id_order) AS order_count
+FROM orders O
+JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
+GROUP BY JP.tipe_pembayaran;
+
+-- 26. Sum of Order Quantity by Product
+SELECT id_produk, SUM(jumlah_order) AS total_order_quantity
+FROM orders
+GROUP BY id_produk;
+
+-- 27. Count of Orders by Product
+SELECT id_produk, COUNT(id_order) AS order_count
+FROM orders
+GROUP BY id_produk;
+
+-- 28. Count of Orders by Category
+SELECT K.nama_kategori, COUNT(id_order) AS order_count
+FROM orders O
+JOIN produk B ON O.id_produk = B.id_produk
+JOIN kategori K ON B.id_kategori = K.id_kategori
+GROUP BY K.nama_kategori;
+
+-- 29. Sum of Order Total Price by Category
+SELECT K.nama_kategori, CONCAT('Rp ', FORMAT(SUM(total_harga), 0)) AS total_order_price
+FROM orders O
+JOIN produk B ON O.id_produk = B.id_produk
+JOIN kategori K ON B.id_kategori = K.id_kategori
+GROUP BY K.nama_kategori;
+
+-- 30. Sum of Order Total Price by Product
+SELECT id_produk,CONCAT('Rp ', FORMAT(SUM(total_harga), 0)) AS total_order_price
+FROM orders
+GROUP BY id_produk;
 
 
 -- SELECT Case
+-- Select total penjualan, rata-rata rating, dan harga produk dari tabel produk, orders, dan rating.
+SELECT 
+    P.id_produk,
+    P.merk,
+    K.nama_kategori,
+    CONCAT('Rp ', FORMAT(AVG(O.total_harga), 0)) AS avg_order_total_price,
+    COUNT(O.id_order) AS total_penjualan,
+    CONCAT('Rating ', FORMAT(AVG(R.bintang), 1)) AS avg_rating
+FROM produk P
+JOIN kategori K ON P.id_kategori = K.id_kategori
+LEFT JOIN orders O ON P.id_produk = O.id_produk
+LEFT JOIN rating R ON P.id_produk = R.id_produk
+GROUP BY P.id_produk, P.merk, K.nama_kategori;
+
+
 -- 1. Produk yang terjual pada tanggal tertentu
 SELECT *
 FROM orders
 WHERE tgl_order = '2023-01-16'; -- Ganti tanggal sesuai kebutuhan
 
--- 2. Pelanggan yang paling banyak berbelanja
-SELECT orders.id_pelanggan, pelanggan.nama_pelanggan, SUM(jumlah_order * total_harga) AS total_orders
-FROM orders
-JOIN pelanggan ON orders.id_pelanggan = pelanggan.id_pelanggan
-GROUP BY orders.id_pelanggan
+-- 2. Pelanggan yang Paling Banyak Berbelanja
+SELECT
+    O.id_pelanggan,
+    P.nama_pelanggan,
+    CONCAT('Rp ', FORMAT(SUM(O.jumlah_order * O.total_harga), 0)) AS total_orders,
+    J.tipe_pembayaran
+FROM orders O
+JOIN pelanggan P ON O.id_pelanggan = P.id_pelanggan
+JOIN jenis_pembayaran J ON O.id_pembayaran = J.id_pembayaran
+GROUP BY O.id_pelanggan
 ORDER BY total_orders DESC
 LIMIT 1;
 
--- 3. Pelanggan dengan metode pengiriman apa
-SELECT O.id_pelanggan, O.id_kurir, O.id_pembayaran, J.tipe_pembayaran
+-- 3. Metode Pembayaran Pelanggan Tertentu
+SELECT
+    O.id_pelanggan,
+    O.id_kurir,
+    O.id_pembayaran,
+    JP.tipe_pembayaran
 FROM orders O
-JOIN jenis_pembayaran J ON O.id_pembayaran = J.id_pembayaran
+JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
 WHERE O.id_pelanggan = 'C1000';
 
 -- 4. Pelanggan di alamat tertentu
