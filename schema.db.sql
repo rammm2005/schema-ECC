@@ -662,47 +662,72 @@ JOIN jenis_pembayaran JP ON O.id_pembayaran = JP.id_pembayaran
 WHERE O.id_pelanggan = 'C1000';
 
 -- 4. Pelanggan di alamat tertentu
-UNION ALL
 SELECT P.*
 FROM pelanggan P
-JOIN alamat A ON P.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos';
+JOIN alamat A ON P.id_alamat = A.id_alamat
+WHERE A.id_kode_pos = '1'
+
+UNION ALL
 
 -- 5. Penjual di alamat tertentu
-UNION ALL
 SELECT Pe.*
 FROM penjual Pe
-JOIN alamat A ON Pe.id_kode_pos = A.id_kode_pos
-WHERE A.id_kode_pos = 'contoh_id_kode_pos';
+JOIN alamat A ON Pe.id_alamat = A.id_alamat
+WHERE A.id_kode_pos = '3'
+
+-- Mengambil jumlah order pada tanggal terbaru
+SELECT id_penjual, COUNT(*) AS total_order, MAX(tgl_order) AS latest_date
+FROM orders
+WHERE DATE(tgl_order) = (SELECT MAX(DATE(tgl_order)) FROM orders)
+GROUP BY id_penjual
+ORDER BY total_order DESC;
+
+-- Mengambil order penjual yang tanggalnya sudah lewat atau terlama
+SELECT id_penjual, COUNT(*) AS total_order, MIN(tgl_order) AS low_date
+FROM orders
+WHERE DATE(tgl_order) = (SELECT MIN(DATE(tgl_order)) FROM orders)
+GROUP BY id_penjual, DATE(tgl_order)
+ORDER BY total_order DESC, low_date;
 
 -- 6. Penjual dengan penjualan terbanyak
-SELECT id_penjual, COUNT(*) AS total_penjualan
+SELECT id_penjual, SUM(jumlah_order) AS total_penjualan
 FROM orders
 GROUP BY id_penjual
 ORDER BY total_penjualan DESC
-LIMIT 1;
+LIMIT 10
+
 
 -- 7. Penjual dengan tahun join paling lama
-UNION ALL
 SELECT P.id_penjual, MIN(YEAR(P.created_at)) AS tahun_join
 FROM penjual P
 GROUP BY P.id_penjual
 ORDER BY tahun_join ASC
-LIMIT 1;
+LIMIT 1
+
+-- Tahun join pembeli dengan tahun baru join
+SELECT P.id_pelanggan, DATE(MAX(P.created_at)) AS latest_date
+FROM pelanggan P
+GROUP BY P.id_pelanggan
+ORDER BY latest_date ASC
+LIMIT 4;
+
+
 
 -- 8. Pelanggan dengan rating terbaik
-UNION ALL
-SELECT R.id_pelanggan, AVG(R.bintang) AS avg_rating
+SELECT R.id_pelanggan, ROUND(AVG(R.bintang), 2) AS avg_rating
 FROM rating R
 GROUP BY R.id_pelanggan
 ORDER BY avg_rating DESC
-LIMIT 1;
+LIMIT 1
+
+
 
 -- 9. Pelanggan dengan rating terburuk
-UNION ALL
-SELECT R.id_pelanggan, AVG(R.bintang) AS avg_rating
+SELECT R.id_pelanggan, ROUND(AVG(R.bintang), 2) AS avg_rating
 FROM rating R
 GROUP BY R.id_pelanggan
 ORDER BY avg_rating ASC
-LIMIT 1;
+LIMIT 2;
+
+
 

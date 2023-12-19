@@ -1,0 +1,58 @@
+FUNGSI constructOBSTUtil(keys, values, freq, i, j, cost, dp):
+    IF i > j THEN
+        RETURN NULL
+    END IF
+
+    IF dp[i][j] != NULL THEN
+        RETURN dp[i][j]
+    END IF
+
+    DECLARE minCost, rootIndex SEBAGAI Integer
+    SET minCost KE INT_MAX
+    SET rootIndex KE -1
+
+    FOR k FROM i TO j DO
+        IF cost[i][k - 1] + cost[k + 1][j] < minCost THEN
+            SET minCost KE cost[i][k - 1] + cost[k + 1][j]
+            SET rootIndex KE k
+        END IF
+    END FOR
+
+    INCREMENT freq[rootIndex]
+
+    DECLARE root SEBAGAI Node
+    SET root KE newNode(keys[rootIndex], values[rootIndex])
+    SET root->left KE constructOBSTUtil(keys, values, freq, i, rootIndex - 1, cost, dp)
+    SET root->right KE constructOBSTUtil(keys, values, freq, rootIndex + 1, j, cost, dp)
+
+    SET dp[i][j] KE root
+    RETURN root
+
+FUNGSI constructOBST(keys, values, freq, n):
+    DECLARE cost, dp SEBAGAI Array[n][n]
+    ALLOCATE memory untuk dp
+
+    FOR i FROM 0 TO n - 1 DO
+        SET cost[i][i] KE freq[i]
+        SET dp[i][i] KE newNode(keys[i], values[i])
+    END FOR
+
+    FOR L FROM 2 TO n DO
+        FOR i FROM 0 TO n - L DO
+            SET j KE i + L - 1
+            SET cost[i][j] KE INT_MAX
+
+            FOR r FROM i TO j DO
+                DECLARE c SEBAGAI Integer
+                SET c KE optimalCost(freq, i, j)
+                SET c KE c + IF r > i THEN cost[i][r - 1] ELSE 0 END IF
+                SET c KE c + IF r < j THEN cost[r + 1][j] ELSE 0 END IF
+
+                IF c < cost[i][j] THEN
+                    SET cost[i][j] KE c
+                END IF
+            END FOR
+        END FOR
+    END FOR
+
+    RETURN constructOBSTUtil(keys, values, freq, 0, n - 1, cost, dp)
